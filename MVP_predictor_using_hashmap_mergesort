@@ -1,0 +1,85 @@
+class Player:
+    def __init__(self, stats):
+        self.stats = stats
+        self.score = 0
+
+    def __lt__(self, other):
+        return self.score < other.score
+
+    def compute_score(self, weights):
+        self.score += self.stats[28] * weights['PTS']  # Points
+        self.score += self.stats[4] * weights['W/L%']  # Win Percentage
+        self.score += self.stats[26] * weights['AST']  # Assists
+        self.score += self.stats[25] * weights['TRB']  # Total Rebounds
+        self.score += self.stats[10] * weights['FG%']  # Field Goal Percentage
+        self.score += self.stats[12] * weights['3P%']  # 3P Percentage
+        self.score += self.stats[7] * weights['MP']  # Minutes per Game
+
+def load_data_into_hash(data):
+    hashmap = {}
+    for row in data:
+        player_name = row[1]
+        hashmap[player_name] = Player(row)
+    return hashmap
+
+def merge_sort(players):
+    if len(players) <= 1:
+        return players
+
+    mid = len(players) // 2
+    left = players[:mid]
+    right = players[mid:]
+
+    left = merge_sort(left)
+    right = merge_sort(right)
+
+    return merge(left, right)
+
+def merge(left, right):
+    result = []
+    i = 0
+    j = 0
+
+    while i < len(left) and j < len(right):
+        if left[i] < right[j]:
+            result.append(left[i])
+            i += 1
+        else:
+            result.append(right[j])
+            j += 1
+
+    while i < len(left):
+        result.append(left[i])
+        i += 1
+
+    while j < len(right):
+        result.append(right[j])
+        j += 1
+
+    return result
+
+# Weights for computing the MVP score
+weights = {
+    'PTS': 1.0,
+    'W/L%': 30,
+    'AST': 0.8,
+    'TRB': 0.7,
+    'FG%': 20,
+    '3P%': 5,
+    'MP': 0.5
+}
+
+# Full data sample
+data = [
+    # ... [All player stats here]
+]
+
+hash_map = load_data_into_hash(data)
+
+for player in hash_map.values():
+    player.compute_score(weights)
+
+sorted_players = merge_sort(list(hash_map.values()))
+
+MVP = sorted_players[-1]
+print(f"The MVP is: {MVP.stats[1]} with a score of {MVP.score}")
